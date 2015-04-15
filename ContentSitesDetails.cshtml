@@ -1,0 +1,439 @@
+﻿@model Sabio.Web.Models.ViewModels.ItemViewModel<Guid?>
+@* strongly types the view and says if I pass a model, it must be of this type*@
+
+@{
+    Layout = "~/Views/Shared/_LayoutSabio.cshtml";
+}
+
+@section styles {
+    <link href="~/css/contentsites-validate.css" rel="stylesheet" />
+    <link href="~/css/ngCloak-style.css" rel="stylesheet" />
+}
+
+
+<h1>Title</h1>
+<div data-ng-controller="contentSitesController as contentsTable" id="contentSitesCtrler">
+    <form ng-cloak class="col-md-6 ng-cloak" role="form" id="frmContentSites" name="form" novalidate>
+        <!-- contentsite profile image-->
+        <!--setting up controller-->
+
+        <div class="overlay-container">
+            <div class=" fa-border"></div>
+            <label for="logo">Site Logo</label>
+            <a class="overlay small" id="contentSitesAddIcon" data-ng-click="contentsTable.showFileInput()" style="top: 35px;">
+                <i class="fa fa-plus" style="margin-left: -26px;">Add Image</i>
+            </a>
+            <a class="overlay small" id="deleteIcon" data-ng-click="contentsTable.deleteFileInput()" style="top: 35px;">
+
+                <i class="fa fa-minus" style="left: 20px;">Delete Image</i>
+            </a>
+            <img data-ng-src="{{contentsTable.src}}" id="logoPreview" height="400" width="200" />
+
+            <!--store the selected image uid in this hidden field-->
+            <input class="hidden" id="imageUid" name="imageUid" ng-value="contentsTable.storeImageResponse">
+            <!--when the overlay is clicked, it will trigger this file reader to pop up "on-change"-->
+            <input type="file" class="hidden" name="picture" id="picture" onchange="angular.element(this).controller().prepareFileUpload(this)" />
+        </div>
+
+
+        <!-- Form starts here -->
+        <div class="contentSites-documentform">
+
+            <!--"no validate removes HTML 5's validation defaults-->
+            <input type="file" name="logo" id="logo" class="hidden" />
+
+            <div class="fa-border"></div>
+
+            @*filePath is added in this hidden object*@
+            <input type="text" id="filePath" name="filePath" value="" class="hidden" />
+
+            <!--value fields that we are collecting data on-->
+            <div class="form-group has-feedback">
+                <label for="contentName"> Name</label>
+                <input type="text" class="form-control addCanForm" id="contentName" name="contentName" data-ng-model="contentsTable.contentname" ng-minlength="2" required>
+                <p class="error" ng-show="contentsTable.contentName.$error.required">At Least 2 Characters Required!</p>
+                <i class="fa fa-user form-control-feedback"></i>
+            </div>
+            <div class="form-group has-feedback">
+                <label for="contentPath"> Path/URL</label>
+                <input type="text" class="form-control addCanForm" id="contentUrl" ng-pattern="/^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/" placeholder="i.e. www.example.com" name="contentWebpage" data-ng-model="contentsTable.url" required>
+                <p class="error" ng-show="form.url.$error.pattern">Valid URL required!</p>
+                <i class="fa fa-wifi form-control-feedback"></i>
+            </div>
+
+            <div class="form-group has-feedback">
+                <label for="publishField"> Publish Date</label>
+
+                <input class="form-control addCanForm" type="date" ng-model="contentsTable.contentPublish" value="{{ contentsTable.date | date: 'yyyy-MM-dd' }}" />
+
+                @*<input type="datetime-local" class="form-control addCanForm " id="publishField" name="contentPublish" ng-model="{{ contentsTable.contentPublish | date }}"
+                    min="2015-03-12" max="2017-12-31" placeholder="MM/DD/YYYY" required>*@
+                <i class="fa fa-clock-o form-control-feedback"></i>
+
+                <p class="error" ng-show="form.contentPublish.$error.ui-date|| form.contentPublish.$error.pattern">Use this format MM/DD/YYYY</p>
+
+            </div>
+
+
+            <label for="abstractCon">Check Box to Include Expiration Date </label>
+            <input type="checkbox" ng-model="checked">
+            <div class="check-element animate-show" ng-hide="checked">
+            </div>
+
+            <div class="form-group has-feedback">
+                <label for="expireField" ng-show="checked"> Expire Date</label>
+
+                <input class="form-control addCanForm" type="date" ng-model="contentsTable.contentExpire">
+                @*<input type="datetime" ng-show="checked" class="form-control addCanForm" id="expireField" name="contentExpire" data-ng-model="contentsTable.contentExpire"
+                    min="2015-03-12" max="2017-12-31" ng-pattern='/^(0?[1-9]|1[012])\/(0?[1-9]|[12][0-9]|3[01])\/(201\d|[2-9]\d{3})$/' ui-date="{dateFormat: 'mm/dd/yyyy'}" placeholder="MM/DD/YYYY" required>*@
+                <i ng-show="checked" class="fa fa-clock-o form-control-feedback"></i>
+
+                <p class="error" ng-show="form.contentExpire.$error.ui-date|| form.contentExpire.$error.pattern">Use this format MM/DD/YYYY</p>
+
+            </div>
+            <!--end of input values-->
+            <!--button that will send form values-->
+            <button class="btn btn-default cmdAddNewContent" type="button" id="cmdAddContent" data-ng-click="contentsTable.actionHandler()">Add</button>
+            <button class="btn btn-default cmdDeleteContent" type="button" id="cmdDeleteContent" data-ng-click="contentsTable.DeleteActionHandler()">Delete</button>
+
+
+            <!--alert messages that will pop up on success or error-->
+            <div class="alertMsg">
+                <div class="alert alert-success ng-show" data-ng-show="contentsTable.showSuccessAlert" role="alert">
+                    <button data-ng-hide="contentsTable.hideSuccessAlertBtn" type="button" class="close ng-hide" aria-label="Close" ng-click="contentsTable.closeAlertBtn()"><span aria-hidden="true">&times;</span></button>
+                    <p><strong>{{contentsTable.showSuccessAlert}}</strong></p>
+                </div>
+
+                <div class="alert alert-danger ng-show" data-ng-show="contentsTable.showErrorAlert" role="alert">
+                    <button data-ng-hide="contentsTable.hideErrorAlertBtn" type="button" class="close ng-hide" aria-label="Close" ng-click="contentsTable.closeAlertBtn()"><span aria-hidden="true">&times;</span></button>
+                    <p><strong>{{contentsTable.showErrorAlert}}</strong></p>
+                </div>
+
+            </div>
+
+        </div>
+        <input type="hidden" name="uid" id="uid" value="@Model.Item">
+    </form>
+</div>
+
+<!--End of ContentSites-->
+@section scripts {
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.13/angular.js"></script>
+
+    <script type="text/javascript" src="~/Scripts/sabio.services.files.js"></script>
+    <script type="text/javascript" src="~/Scripts/sabio.services.contentSites.js"></script>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.16/angular.min.js"></script>
+    <script type="text/javascript" src="https://rawgit.com/betsol/angular-input-date/master/src/angular-input-date.js"></script>
+    <script type="text/javascript">
+
+        sabio.services.contentSitesFactory = function ($baseService) {
+
+            var aSabioServiceObject = sabio.services.contentSites;
+
+            var newService = $.extend(true, {}, aSabioServiceObject, $baseService);
+
+            return newService;
+
+        }
+
+        sabio.services.filesFactory = function ($baseService) {
+
+            var aSabioServiceObject = sabio.services.files;
+
+            var newService = $.extend(true, {}, aSabioServiceObject, $baseService);
+
+            return newService;
+
+        }
+
+        sabio.page.contentSitesControllerFactory = function (
+          $scope
+          , $baseController
+          , $contentSitesService, $filesService) {
+
+            var vm = this;
+            vm.$contentSitesService = $contentSitesService;
+            vm.$filesService = $filesService;
+
+            vm.storeImageResponse = null;
+            vm.src = "/images/file1.png";
+            vm.showSuccessAlert = null;
+            vm.showErrorAlert = null;
+            vm.cmsUid = null;
+            vm.contentname = null;
+            vm.url = null;
+            vm.contentPublish = null;
+            vm.contentExpire = new Date(2014, 3, 19);
+
+
+            vm.showFileInput = _showFileInput;
+            vm.prepareFileUpload = _prepareFileUpload;
+            vm.onAddImageSuccess = _onAddImageSuccess;
+            vm.onAddImageError = _onAddImageError;
+            vm.addNewContent = _addNewContent;
+            vm.onAddValueSuccess = _onAddValueSuccess;
+            vm.onAddValueError = _onAddValueError;
+            vm.updateDetails = _updateDetails;
+            vm.onUpdateValueSuccess = _onUpdateValueSuccess;
+            vm.onUpdateValueError = _onUpdateValueError;
+            vm.onGetDetailsSuccess = _onGetDetailsSuccess;
+            vm.onDeleteDetailsSuccess = _onDeleteDetailsSuccess;
+            vm.onDeleteDetailsError = _onDeleteDetailsError;
+
+            vm.closeAlertBtn = _closeAlertBtn;
+            vm.actionHandler = _actionHandler;
+            vm.DeleteActionHandler = _DeleteActionHandler;
+            vm.storeContentResponse = _storeContentResponse;
+
+            //-- this line to simulate inheritance
+            $.extend(vm, $baseController);
+
+            //this is a wrapper for our small dependency on $scope
+            vm.notify = vm.$contentSitesService.getNotifier($scope);
+
+            //on page load, fire this function to initiate page hydration
+            retrieveContentDetails();
+
+            //function that will do the Asynchronous JavaScript XML call
+            function retrieveContentDetails() {
+
+                var uid = $('#uid').val();
+                console.debug(uid);
+
+                vm.$contentSitesService.getDetails(uid
+                    , vm.onGetDetailsSuccess
+                    , vm.onGetDetailsError);
+
+                console.debug("abouttotest");
+            }
+
+
+
+            function _onGetDetailsSuccess(response) {
+                //this receives the data and calls the special
+                //notify method that will trigger ng to refresh UI
+
+                if (response.item) {
+                    vm.notify(function () {
+
+                        vm.contentname = response.item.name;
+                        vm.url = response.item.url;
+                        vm.contentPublish = response.item.publishDate;
+
+                        //find a function to convert local time to datetime
+                        vm.contentExpire = response.item.expireDate;
+                        vm.content = response.item.expireDate;
+
+                        if (response.item.photo) {
+                            vm.src = "https://sabio-training.s3-us-west-2.amazonaws.com" + response.item.photo;
+                        }
+                    });
+                }
+
+
+            }
+
+            function _onGetDetailsError() {
+                console.debug("failure!");
+            }
+
+
+            function _actionHandler() {
+
+                if (sabio.page.isInEditMode) {
+                    vm.updateDetails();
+                } else {
+                    vm.addNewContent();
+
+                }
+
+            }
+
+            function _DeleteActionHandler() {
+                console.log("click click");
+
+                var uid = $('#uid').val();
+                console.debug(uid);
+
+                var photoId = vm.src;
+                console.debug(photoId);
+
+                vm.$contentSitesService.deletePage(uid
+                    , vm.onDeleteDetailsSuccess
+                    , vm.onDeleteDetailsError);
+
+            }
+
+
+            function _onDeleteDetailsSuccess() {
+
+                //call a vm notify and null out the properties on the fields above
+                console.log("success!");
+
+                vm.notify(function () {
+
+                    vm.showSuccessAlert = "Your Changes Were Successfully Deleted!";
+
+                    vm.src = "/images/file1.png";
+                    vm.contentname = null;
+                    vm.url = null;
+                    vm.contentPublish = null;
+                    vm.contentExpire = null;
+
+                });
+            }
+
+            function _onDeleteDetailsError() {
+
+
+                console.log("error!");
+
+                vm.showErrorAlert = "Request is invalid. Try again";
+
+            }
+
+            function _addNewContent() {
+                console.log("button clicked");
+
+                //data object passed as argument parameter for AJAX request
+                var data = {
+                    "Name": vm.contentname,
+                    "URL": vm.url,
+                    "PublishDate": vm.contentPublish,
+                    "ExpireDate": vm.contentExpire,
+                    "Photo": vm.storeImageResponse
+                };
+
+                vm.$contentSitesService.postContentValues(data, vm.onAddValueSuccess, vm.onAddValueError);
+            }
+
+            function _onAddValueSuccess(response) {
+                vm.notify(function () {
+                    vm.showSuccessAlert = "Your Changes Were Successfully Added!";
+                });
+                $("#cmdAddContent").html("Update");
+                sabio.page.isInEditMode = true;
+
+                //call this function to store the response
+                vm.storeContentResponse(response);
+
+            }
+
+            function _storeContentResponse(contentsSiteUid) {
+                $('#uid').val(contentsSiteUid);
+                //take the data and make it the value of #uid input field
+                console.debug("The value of vm.cmsUid is: " + contentsSiteUid.item);
+            };
+
+            function _onAddValueError() {
+                vm.notify(function () {
+                    vm.showErrorAlert = "The request is invalid. Make sure you add a photo and that all fields are valid";
+                });
+            }
+
+            //update content
+            function _updateDetails() {
+
+                var updateData = {
+                    "Name": vm.contentname,
+                    "URL": vm.url,
+                    "PublishDate": vm.contentPublish,
+                    "ExpireDate": vm.contentExpire,
+                    "Photo": vm.storeImageResponse,
+                    ContentSiteUid: vm.cmsUid
+                };
+
+                vm.$contentSitesService.updateDetails(vm.cmsUid, updateData, vm.onUpdateValueSuccess, vm.onUpdateValueError);
+            }
+
+            function _onUpdateValueSuccess() {
+                vm.notify(function () {
+                    vm.showSuccessAlert = "Your Changes Were Successfully Updated!";
+                });
+
+            }
+
+            function _onUpdateValueError() {
+                vm.notify(function () {
+                    vm.showErrorAlert = "The request is invalid. Try Updating Again";
+                });
+            }
+
+            //clicking overlay initiates this function to change value of #picture and bring up file reader
+            function _showFileInput() {
+
+                var currentImageValue = vm.storeImageResponse;
+
+                console.log("overlay clicked");
+                var clickHiddenInput = angular.element('#picture').trigger('click');
+            }
+
+            //file reader collects the file type of image and changes the source of the image element.
+            //Ajax call is made
+            function _prepareFileUpload(element) {
+
+
+                console.debug("I have a string");
+
+                if (element.files && element.files[0]) {
+                    var reader = new FileReader();
+                    reader.onload = function (e) {
+                        $('#logoPreview').attr('src', e.target.result);
+                    }
+                    reader.readAsDataURL(element.files[0]);
+
+                    var imageData = new FormData();
+                    $.each(element.files, function (key, value) {
+                        console.debug(key);
+                        imageData.append(key, value);
+                    });
+
+
+                    vm.$filesService.add(imageData, vm.onAddImageSuccess, vm.onAddImageError);
+                    console.debug("successfully added image to Amazon Service");
+
+                }
+            }
+
+            function _onAddImageSuccess(response) {
+
+                vm.storeImageResponse = response.item;
+
+                var response = vm.storeImageResponse;
+
+                var dataPackage = {
+                    "Photo": vm.storeImageResponse
+                };
+
+            }
+
+            function _onAddImageError() {
+                vm.onUpdateError();
+            }
+
+
+            function _closeAlertBtn() {
+
+                vm.showErrorAlert = null;
+                vm.showSuccessAlert = null;
+            }
+
+        }
+
+        sabio.ng.addService(sabio.ng.app.module
+          , "$contentSitesService"
+          , ["$baseService"]
+          , sabio.services.contentSitesFactory);
+
+        sabio.ng.addService(sabio.ng.app.module
+      , "$filesService"
+      , ["$baseService"]
+      , sabio.services.filesFactory);
+
+        sabio.ng.addController(sabio.ng.app.module
+          , "contentSitesController"
+          , ['$scope', '$baseController', "$contentSitesService", "$filesService"]
+          , sabio.page.contentSitesControllerFactory)
+        //add $filter to this list and to the top
+    </script>
+}

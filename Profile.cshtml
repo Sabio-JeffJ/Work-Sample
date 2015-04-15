@@ -1,0 +1,780 @@
+﻿
+
+@{
+    Layout = "~/Views/Shared/_LayoutSabio.cshtml";
+}
+
+@*page URL: votehub.dev/users/profile*@
+
+@*<form role="form" id="form">*@
+<div class="vertical">
+    <!-- Nav tabs -->
+    <ul role="tablist" class="nav nav-tabs">
+        <li class="active"><a data-toggle="tab" role="tab" href="#vtab1"><i class=" fa fa-user pr-5"></i> User Profile</a></li>
+        <li><a data-toggle="tab" role="tab" href="#vtab2"><i class="fa fa-home pr-5"></i>Address</a></li>
+        <li><a data-toggle="tab" role="tab" href="#vtab3"><i class="fa fa-camera-retro pr-5"></i>Photo</a></li>
+        <li><a data-toggle="tab" role="tab" href="#vtab4" @*class="cmdRetrieveDemoProfile"*@><i class="fa fa-stack-overflow pr-10"></i>Other Info</a></li>
+    </ul>
+    <!-- Tab panes -->
+    <!--NOTE: Control M + Control H = collapse; Control M + Control U=un-collapse-->
+    <!--Begin User Name pane-->
+    <div class="tab-content">
+        <div id="vtab1" class="tab-pane fade in active">
+            <form role="form" id="form">
+                <h1 class="text-center title">My Profile</h1>
+                <div class="form-group">
+                    <label for="firstName">First Name:</label>
+                    <input type="text" class="form-control" id="firstName" name="firstName" placeholder="enter first name">
+                </div>
+
+                <br>
+
+                <div class="form-group">
+                    <label for="lastName">Last Name:</label>
+                    <input type="text" class="form-control" id="lastName" name="lastName" placeholder="enter last name">
+                </div>
+
+                <br>
+
+                <div class="form-group">
+                    <label for="handle">Handle:</label>
+                    <input type="text" class="form-control" id="handle" name="handle" placeholder="enter a handle">
+                </div>
+
+                <br>
+
+
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="email" class="form-control" id="email" name="email" placeholder="enter an email">
+                </div>
+
+                <br>
+
+                <div class="form-group">
+                    <label for="phone">Mobile Phone (optional):</label>
+                    <input type="text" class="form-control" id="phone" name="phone" placeholder="enter a mobile phone">
+                </div>
+
+                <br>
+
+
+                <a class="btn btn-default cmdUpdateProfile">Update Profile</a>
+            </form>
+        </div>
+        <!--End User Name pane-->
+        <!--Begin Address Pane-->
+        <div id="vtab2" class="tab-pane fade in">
+            <form role="form" id="addressForm">
+                <h1 class="text-center title">My Address</h1>
+                <div class="form-group">
+                    <label for="line1">Address Line 1:</label>
+                    <input type="text" class="form-control" id="line1" name="line1" placeholder="enter address 1">
+                </div>
+
+                <br>
+
+                <div class="form-group">
+                    <label for="line2">Address Line 2:</label>
+                    <input type="text" class="form-control" id="line2" name="line2" placeholder="enter address 2">
+                </div>
+
+                <br>
+
+                <div class="form-group">
+                    <label for="city">City:</label>
+                    <input type="text" class="form-control" id="city" name="city" placeholder="enter a city">
+                </div>
+
+                <br>
+
+
+                <div class="form-group">
+                    <label for="state">State:</label>
+                    <select class="form-control" id="statelist" name="statelist" aria-required="true" aria-invalid="false">
+                        <option value="" selected>--Select One--</option>
+
+
+                    </select>
+                </div>
+
+                <br>
+
+                <div class="form-group">
+                    <label for="zipcode">ZIP Code:</label>
+                    <input type="text" class="form-control" id="zipcode" name="zipcode" placeholder="enter ZIP code">
+                </div>
+
+                <a class="btn btn-default cmdUpdateAddress" id="cmdUpdateAddress">Update</a>
+
+                <!--Hidden Field to hold the AddressUid-->
+                <input type="hidden" class="form-control" id="addressUid" name="addressUid" />
+
+            </form>
+
+        </div>
+        <!--Begin Upload Pic to User Profile-->
+        <div id="vtab3" class="tab-pane fade in ">
+            <form role="form" id="formPhoto" name="image">
+                <h1 class="text-center title">My Photo</h1>
+                <div class="form-group" data-ng-controller="usersController as userProfile" id="usersCtrler">
+                    <label for="picture">Please Upload an Image.</label>
+                    <div class="overlay-container">
+
+                        <a class="overlay small" id="addIcon" data-ng-click="userProfile.showFileInput()">
+
+                            <i class="fa fa-plus">Add Image</i>
+
+                        </a>
+
+                        <a class="overlay small" id="deleteIcon" data-ng-click="userProfile.deleteFileInput()">
+
+                            <i class="fa fa-minus" style="left: 20px;">Delete Image</i>
+                        </a>
+
+                        <img data-ng-src="{{userProfile.src}}" id="imagePreview" />
+
+                        <!--store the image url here-->
+                        <input class="hidden" id="imageUid" name="imageUid" ng-value="userProfile.storeImageResponse">
+
+                        <input type="file" class="hidden" name="picture" id="picture" onchange="angular.element(this).controller().prepareFileUpload(this)" />
+
+                    </div>
+
+                    <br>
+
+
+                    <div class="alertMsg">
+                        <div class="alert alert-success ng-show" data-ng-show="userProfile.showSuccessAlert" role="alert">
+                            <button data-ng-hide="userProfile.hideSuccessAlertBtn" type="button" class="close ng-hide" aria-label="Close" ng-click="userProfile.closeAlertBtn()"><span aria-hidden="true">&times;</span></button>
+                            <p><strong>AWESOME!</strong>{{userProfile.showSuccessAlert}}</p>
+                        </div>
+
+
+                        <div class="alert alert-danger ng-show" data-ng-show="userProfile.showErrorAlert" role="alert">
+                            <button data-ng-hide="userProfile.hideErrorAlertBtn" type="button" class="close ng-hide" aria-label="Close" ng-click="userProfile.closeAlertBtn()"><span aria-hidden="true">&times;</span></button>
+                            <p><strong>OOPS!</strong>{{userProfile.showErrorAlert}}</p>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </form>
+
+        </div>
+        <!--End Upload to UserProfile-->
+
+        <div id="vtab4" class="tab-pane fade in">
+            <!--End User Name pane-->
+            <!--Begin Users Profile Other Information Tab-->
+            <form role="form" id="formDemographic">
+
+                <h1 class="text-center title">Additional Info:</h1>
+                <div class="form-group">
+                    <label for="gender">Gender:</label>
+                    <br>
+                    <select id="gender" name="gender" aria-required="true" aria-invalid="false" class="valid">
+                        <option value="">SELECT</option>
+                        <option value="1">Male</option>
+                        <option value="2">Female</option>
+                    </select>
+                </div>
+
+                <br>
+
+                <div class="form-group">
+                    <label for="race">Race:</label>
+                    <br>
+                    <select id="race" name="race" aria-required="true" aria-invalid="false" class="valid">
+                        <option value="">SELECT</option>
+                        <option value="1">Caucasian</option>
+                        <option value="2">African American</option>
+                        <option value="3">Latin American</option>
+                        <option value="4">Pacific Islander</option>
+                    </select>
+                </div>
+
+                <br>
+
+                <div class="form-group">
+                    <label for="languagesSpoken">Languages Spoken:</label>
+                    <br>
+                    <input type="text" class="form-control" id="languagesSpoken" name="languagesSpoken" placeholder="Enter a Language" rows="6">
+                </div>
+
+                <br>
+
+                <div class="form-group">
+                    <label for="politicalAffiliation">Political Party or Affiliation:</label>
+                    <br>
+                    <select id="politicalAffiliation" name="politicalAffiliation" aria-required="true" aria-invalid="false" class="valid">
+                        <option value="">SELECT</option>
+                        <option value="1">Republican</option>
+                        <option value="2">Democrat</option>
+                        <option value="3">Independent</option>
+                        <option value="4">Libertarian</option>
+                    </select>
+                </div>
+
+                <br>
+
+                <div class="form-group">
+                    <label for="dob">Date of Birth:</label>
+                    <br>
+                    <input type="text" class="form-control" id="dob" name="dob" placeholder="Enter a date of birth">
+
+                </div>
+
+                <br>
+                <div class="form-group">
+                    <label for="maritalStatus">Marital Status:</label>
+                    <br>
+                    <select id="maritalStatus" name="maritalStatus" aria-required="true" aria-invalid="false" class="valid">
+                        <option value="">SELECT</option>
+                        <option value="1">N/A</option>
+                        <option value="2">Married</option>
+                        <option value="3">Single</option>
+                        <option value="4">Divorced</option>
+                        <option value="5">Widow</option>
+                    </select>
+                </div>
+
+                <br>
+                <div class="form-group">
+                    <label for="educationLevel">Education Level:</label>
+                    <br>
+                    <select id="educationLevel" name="educationLevel" aria-required="true" aria-invalid="false" class="valid">
+                        <option value="">SELECT</option>
+                        <option value="1">N/A</option>
+                        <option value="2">HighSchool Graduate</option>
+                        <option value="3">Bachelors</option>
+                        <option value="4">Masters</option>
+                        <option value="5">Doctrine/MD/Other</option>
+                    </select>
+                </div>
+                <br>
+
+
+                <input type="hidden" class="form-control" value="" name="Id" id="Id">
+                <!--test with value="be75e113-4a3b-4bc3-ab8e-ec08385e84cf"-->
+
+                <a class="btn btn-default cmdUpdateDemoProfile">Update Other Info</a>
+
+            </form>
+        </div>
+    </div>
+
+</div>
+
+<!--End Pane-->
+@section scripts{
+
+    <script src="~/Scripts/sabio.services.stateprovince.js"></script>
+    <script src="~/Scripts/additional-methods.js"></script>
+    <script type="text/javascript" src="~/Scripts/sabio.services.users.js"></script>
+    <script type="text/javascript" src="~/Scripts/sabio.services.files.js"></script>
+    <script type="text/javascript">
+        //onload have request for currentuserId > pass that into the hidden input field.  on response, save id to object on dom. 
+
+        sabio.page.startUp = function () {
+            sabio.page.validationRules();
+            sabio.page.retrieveDemoProfile();
+            sabio.services.stateprovince.listStateProvince(null, sabio.page.listStateProvinceError, { targetSelectId: "#statelist" });
+            console.log("after ajax");
+
+            $(".cmdUpdateProfile").on("click", sabio.page.handlers.updateProfile); // CHECK
+            $(".cmdUpdateDemoProfile").on("click", sabio.page.handlers.updateDemographicProfileOther);
+            $(".cmdUpdateAddress").on("click", sabio.page.handlers.updateAddress);
+            console.log("end startup ");
+
+        }
+
+        sabio.page.trimStates = function (states) {
+            return states.splice(0, 10);
+        }
+
+        sabio.services.usersFactory = function ($baseService) {
+
+            var aSabioServiceObject = sabio.services.users;
+
+            //$.extend(aSabioServiceObject, $baseService);
+            var newService = $.extend(true, {}, aSabioServiceObject, $baseService);
+
+            return newService;
+
+        }
+
+        sabio.services.filesFactory = function ($baseService) {
+
+            var aSabioServiceObject = sabio.services.files;
+
+            //$.extend(aSabioServiceObject, $baseService);
+            var newService = $.extend(true, {}, aSabioServiceObject, $baseService);
+
+            return newService;
+
+        }
+
+        sabio.page.usersControllerFactory = function (
+           $scope
+           , $baseController
+           , $usersService, $filesService) {
+
+            var vm = this;
+            vm.$usersService = $usersService;
+            vm.$filesService = $filesService;
+
+            vm.showSuccessAlert = null;
+            vm.showErrorAlert = null;
+            vm.storeImageResponse = null;
+            vm.photo = "hello";
+            vm.src = "/images/team-member-3.jpg";
+
+            vm.deleteFileInput = _deleteFileInput;
+            vm.updateImage = _updateImage;
+            vm.closeAlertBtn = _closeAlertBtn;
+            vm.showFileInput = _showFileInput;
+            vm.prepareFileUpload = _prepareFileUpload;
+
+            vm.onAddImageSuccess = _onAddImageSuccess;
+            vm.onAddImageError = _onAddImageError;
+            vm.onUpdateSuccess = _onUpdateSuccess;
+            vm.onUpdateError = _onUpdateError;
+            vm.onDeleteSuccess = _onDeleteSuccess;
+            vm.onDeleteError = _onDeleteError;
+            vm.onGetImageSuccess = _onGetImageSuccess;
+            vm.onGetImageError = _onGetImageError;
+
+
+            //-- this line to simulate inheritance
+            $.extend(vm, $baseController);
+
+            //this is a wrapper for our small dependency on $scope
+            vm.notify = vm.$usersService.getNotifier($scope);
+
+            retrieveUserImage();
+
+
+            function retrieveUserImage() {
+
+                vm.$usersService.preloadUserPhoto(vm.onGetImageSuccess, vm.onGetImageError);
+
+            }
+
+            function _onGetImageSuccess(response) {
+                if (response.item.photo) {
+                    $('#imagePreview').attr('src', "https://sabio-training.s3-us-west-2.amazonaws.com" + response.item.photo);
+
+                }
+
+            }
+
+            function _onGetImageError() {
+                console.debug("failure!");
+            }
+
+            //add image
+            function _showFileInput() {
+
+                var currentImageValue = vm.storeImageResponse;
+
+                console.log("overlay clicked");
+                var clickHiddenInput = angular.element('#picture').trigger('click');
+            }
+
+            function _prepareFileUpload(element) {
+
+
+                console.debug("I have a string");
+
+                if (element.files && element.files[0]) {
+                    var reader = new FileReader();
+                    reader.onload = function (e) {
+                        $('#imagePreview').attr('src', e.target.result);
+                    }
+                    reader.readAsDataURL(element.files[0]);
+
+                    var imageData = new FormData();
+                    $.each(element.files, function (key, value) {
+                        console.debug(key);
+                        imageData.append(key, value);
+                    });
+
+                    console.debug("about to add image");
+
+                    vm.$filesService.add(imageData, vm.onAddImageSuccess, vm.onAddImageError);
+                    console.debug("making ajax call");
+                }
+
+            }
+
+            function _onAddImageSuccess(response) {
+
+                vm.storeImageResponse = response.item;
+                var response = vm.storeImageResponse;
+
+                var dataPackage = {
+                    "Photo": vm.storeImageResponse
+                };
+
+                vm.$usersService.uploadPhoto(dataPackage, vm.onUpdateSuccess, vm.onUpdateError);
+
+            }
+
+            function _onAddImageError() {
+                vm.onUpdateError();
+            }
+
+            //update image
+            function _updateImage() {
+
+                var imageUrl = vm.storeImageResponse;
+
+                var dataPackage = {
+                    "Photo": imageUrl
+                };
+                console.debug(dataPackage);
+
+                vm.$usersService.uploadPhoto(dataPackage, vm.onUpdateSuccess, vm.onUpdateError);
+
+                vm.closeAlertBtn();
+            }
+
+            function _onUpdateSuccess(data) {
+                //this receives the data and calls the special
+                //notify method that will trigger ng to refresh UI
+
+                vm.notify(function () {
+                    vm.showSuccessAlert = "  Photo updated!";
+                });
+
+            }
+
+            function _onUpdateError(jqXhr, error) {
+
+                vm.notify(function () {
+                    vm.showErrorAlert = "  Update did not go through. Retry!";
+                });
+
+            }
+
+            function _closeAlertBtn() {
+
+                vm.showErrorAlert = null;
+                vm.showSuccessAlert = null;
+            }
+
+            //delete image
+            function _deleteFileInput() {
+
+                vm.$usersService.removePhoto(vm.onDeleteSuccess, vm.onDeleteError);
+
+                vm.closeAlertBtn();
+
+                //bring back original image
+                var profileTemplate = $("#imagePreview").attr("src", "/images/team-member-3.jpg");
+            }
+
+            function _onDeleteSuccess() {
+                vm.notify(function () {
+                    vm.showSuccessAlert = " Delete Successful!";
+                });
+            }
+
+            function _onDeleteError() {
+                vm.notify(function () {
+                    vm.showErrorAlert = "  Delete failed. Try again!";
+                });
+            }
+
+        }
+
+
+        sabio.ng.addService(sabio.ng.app.module
+      , "$usersService"
+      , ["$baseService"]
+      , sabio.services.usersFactory);
+
+        sabio.ng.addService(sabio.ng.app.module
+      , "$filesService"
+      , ["$baseService"]
+      , sabio.services.filesFactory);
+
+        sabio.ng.addController(sabio.ng.app.module
+                 , "usersController"
+                 , ['$scope', '$baseController', "$usersService", "$filesService"]
+                 , sabio.page.usersControllerFactory)
+
+        sabio.page.handlers.updateProfile = function () {
+
+            var textValueFirstName = $('#firstName').val();
+            var textValueLastName = $("#lastName").val();
+            var textValueHandle = $("#handle").val();
+            var textValueEmail = $("#email").val();
+            var textValuePhone = $("#phone").val();
+            var textValueGender = $("#gender").val();
+            var textValueRace = $("#race").val();
+            var textValueLanguagesSpoken = $("#languagesSpoken").val();
+            var textValuePoliticalAffiliation = $("#politicalAffiliation").val();
+            var textValueDob = $("#dob").val();
+            var textValueMaritalStatus = $("#maritalStatus").val();
+            var textValueEducationLevel = $("#educationLevel").val();
+
+            //These are console logs to make sure values are retrieved from above
+            console.debug(textValueFirstName);
+            console.debug(textValueLastName);
+            console.debug(textValueHandle);
+            console.debug(textValueEmail);
+            console.debug(textValuePhone);
+            console.debug(textValueGender);
+            console.debug(textValueRace);
+            console.debug(textValuePoliticalAffiliation);
+            console.debug(textValueDob);
+            console.debug(textValueMaritalStatus);
+            console.debug(textValueEducationLevel);
+
+            // Method to check that the form is valid
+            sabio.page.checkValidate();
+
+
+        }
+
+        sabio.page.checkValidate = function () {
+            var isValid = $("#form").valid();
+            console.log(isValid);
+
+            if (isValid) {
+                var data = $("#form").serialize();
+                sabio.page.PostProfileValues(data);
+            } else {
+                //dispaly error message
+            }
+        }
+
+        sabio.page.handlers.updateDemographicProfileOther = function () { //changes value of
+            var isValid = $("#formDemographic").valid();
+            console.log(isValid);
+
+            if (isValid) {
+
+                var data = $("#formDemographic").serialize();
+                sabio.services.users.UpdateDemographicProfileValues(data);
+
+            }
+        }
+
+        sabio.page.validationRules = function () {
+
+            var options = {
+                rules: {
+                    firstName: {
+                        required: true,
+                        minlength: 2
+                    },
+                    lastName: {
+                        required: true,
+                        minlength: 2
+                    },
+                    handle: {
+                        required: true,
+                    },
+                    email: {
+                        required: true,
+                        email: true
+                    },
+                    phone: {
+                        phoneUS: true
+                    },
+                    gender: {
+                        required: true,
+                    },
+                    race: {
+                        required: true,
+                    },
+                    languagesSpoken: {
+                        required: true,
+                        minlength: 2
+                    },
+                    politicalAffiliation: {
+                        required: true,
+                    },
+                    dob: {
+                        required: true,
+                        date: true,
+                    },
+                    maritalStatus: {
+                        required: true
+                    },
+                    educationLevel: {
+                        required: true
+                    },
+                    line1: {
+                        required: true,
+                        minlength: 2
+                    },
+                    line2: {
+                        required: true,
+                        minlength: 2
+                    },
+                    city: {
+                        required: true,
+                        minlength: 2
+                    },
+                    state: {
+                        required: true
+                    },
+                    zipcode: {
+                        required: true,
+                        zipcodeUS: true
+                    }
+
+                },
+            }
+            options.debug = true;
+
+            //Added Messages for these three fields if requirements not met
+            options.messages =
+            {
+                firstName: {
+                    required: "Please specify your first name. Minimum 2 characters",
+                },
+                lastName: {
+                    required: "Please specify your first name. Minimum 2 characters",
+                },
+            };
+
+            //Validate the rules to make sure they are input correctly.
+            $('#addressForm').validate(options);
+            $('#form').validate(options);
+            $('#formDemographic').validate(options);
+
+        }
+
+        sabio.page.checkValidate = function () {
+
+            var isValid = $('#form').valid();
+            console.log(isValid);
+
+            if (isValid) {
+                var data = $("#form").serialize();
+
+                sabio.services.users.postProfileValues(data, sabio.page.addProfileSuccess, sabio.page.addProfileError);
+                console.log("posted values");
+            }
+
+        }
+
+        sabio.page.handlers.updateAddress = function () {
+            sabio.page.checkValidateAddress();
+
+        }
+
+        //Get Request
+        sabio.page.retrieveDemoProfile = function () {
+
+            var id = $('#Id').val();
+
+            sabio.services.users.UserProfileandOther(id, sabio.page.retrieveDemoProfileSuccess
+                , sabio.page.retrieveDemoProfileError);
+
+
+        }
+ 
+        sabio.page.retrieveDemoProfileSuccess = function (response) {
+
+
+            sabio.page.populateDemoForm(response.item);
+            
+        }
+
+        sabio.page.retrieveDemoProfileError = function () {
+            //do nothing;
+            $('#Id').val();
+        }
+
+        sabio.page.populateDemoForm = function (formValue) {
+            if (!formValue) {
+                return;
+            }
+            $('#firstName').val(formValue.firstName);
+            $('#lastName').val(formValue.lastName);
+            $('#handle').val(formValue.handle);
+            $('#email').val(formValue.email);
+            $('#phone').val(formValue.phoneNumber);
+            $('#gender').val(formValue.gender);
+            $('#race').val(formValue.race);
+            $('#languagesSpoken').val(formValue.languagesSpoken);
+            $('#politicalAffiliation').val(formValue.politicalAffiliation);
+            $('#dob').val(formValue.dob);
+            $('#maritalStatus').val(formValue.maritalStatus);
+            $('#educationLevel').val(formValue.educationLevel);
+           // $('#Id').val(Id);
+            {
+                $(".cmdRetrieveDemoProfile").unbind().click();
+            }
+        }
+
+        sabio.page.checkValidateAddress = function () {
+
+            var isValid = $('#addressForm').valid();
+            console.log(isValid);
+
+            if (isValid) {
+                var data = $("#addressForm").serialize();
+
+                if (sabio.page.isInUpdateMode) {
+                    var addressUid = $('#addressUid').val();
+
+                    sabio.services.users.updateAddress(addressUid, data, sabio.page.updateAddressSuccess,
+                        sabio.page.updateAddressError);
+                }
+                else {
+                    sabio.services.users.addAddress(data, sabio.page.addAddressSuccess, sabio.page.addAddressError);
+                }
+            }
+        }
+
+        sabio.page.addProfileSuccess = function (data, status, xhr) {
+            console.log(JSON.stringify(data));
+        }
+
+        sabio.page.addProfileError = function (jqXHR, textStatus, errorThrown) {
+            console.error(errorThrown);
+        }
+
+        sabio.page.addAddressSuccess = function (data) {
+            sabio.page.isInUpdateMode = true;
+            sabio.page.storeResponse(data.item);
+        }
+
+        sabio.page.storeResponse = function (myAddressUid) {
+            $('#addressUid').val(myAddressUid);
+        }
+
+        sabio.page.addAddressError = function (errorThrown) {
+            console.error(errorThrown);
+        }
+
+        sabio.page.updateAddressSuccess = function (data) {
+            console.log(data);
+        }
+
+        sabio.page.updateAddressError = function (errorThrown) {
+            console.error(errorThrown);
+        }
+
+        sabio.page.handlers.updateDemographicProfileOther = function () { //changes value of
+            var isValid = $("#formDemographic").valid();
+            console.log(isValid);
+
+            if (isValid) {
+                var data = $("#formDemographic").serialize();
+                sabio.services.users.UpdateDemographicProfileValues(data);
+            } else {
+                //display error message
+            }
+        }
+
+    </script>
+}
